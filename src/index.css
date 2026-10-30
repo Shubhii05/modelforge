@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: #1F2430;
+  }
+  body {
+    background-color: #0B0D12;
+    color: #E6E8EE;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Custom scrollbars for dense IDE look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0D12;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F2430;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2D3546;
+}
+
+/* React Flow custom overrides for dark theme */
+.react-flow__background {
+  background-color: #0B0D12 !important;
+}
+
+.react-flow__edge-path {
+  stroke: #3E485E !important;
+  stroke-width: 2 !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #FF6B2C !important;
+}
+
+.react-flow__handle {
+  width: 9px !important;
+  height: 9px !important;
+  background-color: #FF6B2C !important;
+  border: 2px solid #0B0D12 !important;
+  border-radius: 50% !important;
+}
