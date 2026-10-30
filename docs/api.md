@@ -22,3 +22,7 @@ Base path: `/api`; JSON responses use snake_case.
 - `DELETE /pipelines/{pipeline_id}` — remove a pipeline (`204`).
 
 Supported blocks: Missing Values, Scaling, Encoding, Outliers, Train/Test Split, Random Forest, XGBoost, Logistic Regression, and SVM. Parameter constraints and defaults are published in `GET /blocks` and enforced by both pipeline writes and block validation.
+
+## Code generation (B3)
+
+- `POST /pipelines/{pipeline_id}/code` — body `{target_column}`; returns `{pipeline_id, filename, target_column, code}`. Generates executable Python using the saved pipeline spec and dataset. It returns `422` if the dataset/target is unavailable or the pipeline does not contain exactly one model block.
