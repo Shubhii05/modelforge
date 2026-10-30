@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from app.api.datasets import router as datasets_router
 from app.api.codegen import router as codegen_router
 from app.api.pipelines import router as pipelines_router
+from app.api.training import router as training_router
 from app.core.database import Base, engine
 from app.models import Dataset, Pipeline  # noqa: F401
 
@@ -12,6 +13,7 @@ app = FastAPI(title="ModelForge API", version="0.1.0")
 app.include_router(datasets_router, prefix="/api")
 app.include_router(pipelines_router, prefix="/api")
 app.include_router(codegen_router, prefix="/api")
+app.include_router(training_router, prefix="/api")
 
 
 class HealthResponse(BaseModel):

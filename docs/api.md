@@ -26,3 +26,11 @@ Supported blocks: Missing Values, Scaling, Encoding, Outliers, Train/Test Split,
 ## Code generation (B3)
 
 - `POST /pipelines/{pipeline_id}/code` — body `{target_column}`; returns `{pipeline_id, filename, target_column, code}`. Generates executable Python using the saved pipeline spec and dataset. It returns `422` if the dataset/target is unavailable or the pipeline does not contain exactly one model block.
+
+## Training and models (B4)
+
+- `POST /pipelines/{pipeline_id}/train` — body `{target_column}`; streams Server-Sent Events named `started`, `metric`, `complete`, or `error`. Each `metric` includes iteration, accuracy, loss, confusion matrix, precision, and F1. A completed run persists the fitted sklearn Pipeline as a joblib artifact.
+- `POST /models/{run_id}/predict` — body `{rows:[{feature:value}]}`; returns predictions and per-class probabilities when the estimator supports them.
+- `GET /models/{run_id}/export` — downloads the saved `.joblib` model artifact.
+
+The same training pipeline handles Missing Values, Scaling, Encoding, and Outliers blocks with Random Forest, XGBoost, Logistic Regression, or SVM estimators. Random Forest, XGBoost, and Logistic Regression report progressive iteration metrics; SVM reports its fitted result.

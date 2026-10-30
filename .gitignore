@@ -30,4 +30,5 @@ dist-ssr
 .env.development
 backend/.env
 backend/*.db
+backend/artifacts/
 *.db
