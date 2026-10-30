@@ -11,3 +11,14 @@ Base path: `/api`; JSON responses use snake_case.
 - `GET /health` — `{"status":"ok"}`.
 
 `DatasetOut`: `{id, name, filename, size_bytes, created_at}`. CSV uploads are limited to 25 MB. Later phases will extend this contract for pipelines, training, code generation, and LLM drafting.
+
+## Pipelines and blocks (B2)
+
+- `GET /blocks` — list supported block types, categories, descriptions, and parameter definitions.
+- `POST /blocks/validate` — body `{type, params}`; returns normalized `{valid, type, params}` or `422` for an unknown type or invalid parameters.
+- `POST /pipelines` — body `{name, dataset_id?, blocks:[{id,type,params}]}`; validates every block and returns a persisted pipeline.
+- `GET /pipelines` and `GET /pipelines/{pipeline_id}` — list or retrieve pipelines.
+- `PUT /pipelines/{pipeline_id}` — replace pipeline name, dataset, and blocks after validation.
+- `DELETE /pipelines/{pipeline_id}` — remove a pipeline (`204`).
+
+Supported blocks: Missing Values, Scaling, Encoding, Outliers, Train/Test Split, Random Forest, XGBoost, Logistic Regression, and SVM. Parameter constraints and defaults are published in `GET /blocks` and enforced by both pipeline writes and block validation.

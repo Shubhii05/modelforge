@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, RootModel
+
+from app.schemas.pipeline import ParamObject
 
 
 class DatasetOut(BaseModel):
@@ -23,9 +25,13 @@ class ColumnProfile(BaseModel):
     date_like: bool
 
 
+class ClassCounts(RootModel[dict[str, int]]):
+    pass
+
+
 class ClassBalance(BaseModel):
     column: str
-    counts: dict[str, int]
+    counts: ClassCounts
     minority_percent: float
     imbalanced: bool
 
@@ -38,9 +44,14 @@ class DatasetProfile(BaseModel):
     class_imbalance: list[ClassBalance]
 
 
+class SuggestedFix(BaseModel):
+    type: str
+    params: ParamObject
+
+
 class SuggestionCard(BaseModel):
     id: str
     severity: str
     title: str
     text: str
-    fix_block: dict[str, object]
+    fix_block: SuggestedFix

@@ -1,11 +1,11 @@
 # Progress
 
 - [x] B1: backend scaffold, configuration, SQLAlchemy dataset model, CSV upload/list, profiler, and suggestion cards.
-- [ ] B2: pipeline CRUD, block catalog/docs, parameter validation.
+- [x] B2: pipeline CRUD, block catalog/docs, parameter validation.
 - [ ] B3: code generation.
 - [ ] B4: training, SSE, prediction, export.
 - [ ] B5: LLM drafting and custom code proposal.
 - [ ] I1: frontend API integration.
 - [ ] I2: evaluation, scripts, CI, README.
 
-API contract is documented in `docs/api.md`. Frontend files were not inspected or changed in B1.
+API contract is documented in `docs/api.md`. Frontend files were not inspected or changed through B2.
