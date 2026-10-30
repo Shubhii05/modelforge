@@ -6,9 +6,8 @@ import { ConfigPanel } from './features/config/ConfigPanel'
 import { usePipelineStore } from './store'
 import { BLOCK_CATALOG } from './types/catalog'
 import type { BlockCategory } from './types/pipeline'
-import {
-  Sliders, Activity, Terminal, ChevronDown, ChevronUp, Database,
-} from 'lucide-react'
+import { Sliders, Activity, Database } from 'lucide-react'
+import { CodePanel } from './features/code/CodePanel'
 
 const CATEGORY_LABELS: Record<BlockCategory, string> = {
   data: 'Data Source',
@@ -18,12 +17,12 @@ const CATEGORY_LABELS: Record<BlockCategory, string> = {
 }
 
 export const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'config' | 'results' | 'playground'>('config')
+
   const {
     transparencyMode, showCode, setTransparencyMode, setShowCode,
     projectName, isRunning, runResults, blocks,
   } = usePipelineStore()
-
-  const [activeTab, setActiveTab] = useState<'config' | 'results' | 'playground'>('config')
 
   const grouped = BLOCK_CATALOG.reduce<Record<BlockCategory, typeof BLOCK_CATALOG>>((acc, entry) => {
     if (!acc[entry.category]) acc[entry.category] = []
@@ -97,38 +96,7 @@ export const App: React.FC = () => {
             </ReactFlowProvider>
           </div>
 
-          {/* Code panel */}
-          {transparencyMode && showCode && (
-            <div className="h-44 border-t border-border bg-surface flex flex-col shrink-0">
-              <div className="h-8 border-b border-border px-3 flex items-center justify-between bg-surface-hover">
-                <div className="flex items-center gap-2">
-                  <Terminal className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-xs font-semibold font-mono text-white">pipeline.py</span>
-                  <span className="text-[10px] font-mono px-1 rounded bg-surface border border-border text-text-muted">
-                    Derived from spec · Read-only
-                  </span>
-                </div>
-                <button onClick={() => setShowCode(false)} className="text-text-muted hover:text-text p-1">
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="flex-1 p-3 font-mono text-xs overflow-auto text-text-muted bg-[#080A0E]">
-                <pre className="text-text">{`# ${blocks.length} block(s) in spec — full code generator wires in P4\n` +
-                  blocks.map((b, i) => `# [${i + 1}] ${b.type}  →  ${b.label}`).join('\n')}</pre>
-              </div>
-            </div>
-          )}
-
-          {transparencyMode && !showCode && (
-            <div className="h-7 border-t border-border bg-surface flex items-center justify-between px-3 shrink-0">
-              <span className="text-[11px] font-mono text-text-muted flex items-center gap-1.5">
-                <Terminal className="w-3 h-3 text-accent" />pipeline.py (collapsed)
-              </span>
-              <button onClick={() => setShowCode(true)} className="text-text-muted hover:text-text flex items-center gap-1 text-[11px]">
-                Expand <ChevronUp className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+          <CodePanel />
         </div>
 
         {/* ── Right: Config | Results | Playground ── */}
