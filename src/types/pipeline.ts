@@ -78,7 +78,7 @@ export interface RunResults {
   f1: number
   loss: number
   epochMetrics: EpochMetric[]
-  confusionMatrix: [[number, number], [number, number]]
+  confusionMatrix: number[][]
 }
 
 export interface DataProfile {

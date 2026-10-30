@@ -1,13 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import { TopBar } from './components/TopBar'
 import { PipelineCanvas } from './features/canvas/PipelineCanvas'
 import { ConfigPanel } from './features/config/ConfigPanel'
+import { DatasetUploader } from './features/dataset/DatasetUploader'
+import { SuggestionCards } from './features/suggestions/SuggestionCards'
+import { ResultsPanel } from './features/results/ResultsPanel'
+import { PlaygroundPanel } from './features/playground/PlaygroundPanel'
+import { TemplatesModal } from './features/templates/TemplatesModal'
 import { usePipelineStore } from './store'
 import { BLOCK_CATALOG } from './types/catalog'
 import type { BlockCategory } from './types/pipeline'
-import { Sliders, Activity, Database } from 'lucide-react'
+import { Sliders, Database } from 'lucide-react'
 import { CodePanel } from './features/code/CodePanel'
+import { runPipeline } from './lib/pipelineRunner'
 
 const CATEGORY_LABELS: Record<BlockCategory, string> = {
   data: 'Data Source',
@@ -18,10 +24,14 @@ const CATEGORY_LABELS: Record<BlockCategory, string> = {
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'config' | 'results' | 'playground'>('config')
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [runError, setRunError] = useState<string | null>(null)
+  const cancelRunRef = useRef<(() => void) | null>(null)
 
   const {
     transparencyMode, showCode, setTransparencyMode, setShowCode,
-    projectName, isRunning, runResults, blocks,
+    projectName, isRunning, blocks, datasetId,
+    setIsRunning, setRunResults, setCurrentEpoch, addEpochMetric, clearResults,
   } = usePipelineStore()
 
   const grouped = BLOCK_CATALOG.reduce<Record<BlockCategory, typeof BLOCK_CATALOG>>((acc, entry) => {
@@ -29,6 +39,38 @@ export const App: React.FC = () => {
     acc[entry.category].push(entry)
     return acc
   }, {} as Record<BlockCategory, typeof BLOCK_CATALOG>)
+
+  const handleRunPipeline = () => {
+    if (isRunning) {
+      // Cancel in-progress run
+      cancelRunRef.current?.()
+      cancelRunRef.current = null
+      setIsRunning(false)
+      return
+    }
+
+    clearResults()
+    setRunError(null)
+    setIsRunning(true)
+    setActiveTab('results')
+
+    cancelRunRef.current = runPipeline(blocks, {
+      onEpoch: (epoch, metric) => {
+        setCurrentEpoch(epoch)
+        addEpochMetric(metric)
+      },
+      onDone: (results) => {
+        setRunResults(results)
+        setIsRunning(false)
+        cancelRunRef.current = null
+      },
+      onError: (message) => {
+        setRunError(message)
+        setIsRunning(false)
+        cancelRunRef.current = null
+      },
+    }, datasetId, projectName)
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-background text-text select-none">
@@ -39,6 +81,8 @@ export const App: React.FC = () => {
         transparencyMode={transparencyMode}
         onToggleCode={() => setShowCode(!showCode)}
         onToggleTransparency={() => setTransparencyMode(!transparencyMode)}
+        onRunPipeline={handleRunPipeline}
+        onOpenTemplates={() => setShowTemplates(true)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -113,52 +157,32 @@ export const App: React.FC = () => {
                 }`}
               >
                 {tab === 'config' && <Sliders className="w-3 h-3" />}
-                {tab === 'results' && <Activity className="w-3 h-3" />}
                 {tab}
               </button>
             ))}
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {activeTab === 'config' && <ConfigPanel />}
-
-            {activeTab === 'results' && (
-              <div className="p-4 space-y-4">
-                <div className="text-xs font-semibold text-white uppercase tracking-wider">Pipeline Evaluation</div>
-                {runResults ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2.5 rounded border border-border bg-surface-hover/50">
-                      <div className="text-[10px] text-text-muted uppercase">Accuracy</div>
-                      <div className="text-lg font-mono font-semibold text-success">{(runResults.accuracy * 100).toFixed(1)}%</div>
-                    </div>
-                    <div className="p-2.5 rounded border border-border bg-surface-hover/50">
-                      <div className="text-[10px] text-text-muted uppercase">Precision</div>
-                      <div className="text-lg font-mono font-semibold text-text">{(runResults.precision * 100).toFixed(1)}%</div>
-                    </div>
-                    <div className="p-2.5 rounded border border-border bg-surface-hover/50">
-                      <div className="text-[10px] text-text-muted uppercase">F1 Score</div>
-                      <div className="text-lg font-mono font-semibold text-text">{runResults.f1.toFixed(3)}</div>
-                    </div>
-                    <div className="p-2.5 rounded border border-border bg-surface-hover/50">
-                      <div className="text-[10px] text-text-muted uppercase">Loss</div>
-                      <div className="text-lg font-mono font-semibold text-text-muted">{runResults.loss.toFixed(3)}</div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-text-muted">Run the pipeline to see results here.</p>
-                )}
+            {runError && <div role="alert" className="mx-3 mt-3 rounded border border-red-500/30 bg-red-500/10 p-2 text-xs text-red-300">{runError}</div>}
+            {activeTab === 'config' && (
+              <div className="space-y-0">
+                <ConfigPanel />
+                <div className="px-4 pb-4 space-y-4">
+                  <DatasetUploader />
+                  <SuggestionCards />
+                </div>
               </div>
             )}
 
-            {activeTab === 'playground' && (
-              <div className="p-4 space-y-3">
-                <div className="text-xs font-semibold text-white uppercase tracking-wider">Live Predictions</div>
-                <p className="text-xs text-text-muted leading-relaxed">Inference playground wires up in P6.</p>
-              </div>
-            )}
+            {activeTab === 'results' && <ResultsPanel />}
+
+            {activeTab === 'playground' && <PlaygroundPanel />}
           </div>
         </aside>
       </div>
+
+      {/* Templates Modal */}
+      {showTemplates && <TemplatesModal onClose={() => setShowTemplates(false)} />}
     </div>
   )
 }

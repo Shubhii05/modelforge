@@ -10,7 +10,7 @@ Base path: `/api`; JSON responses use snake_case.
 - `GET /datasets/{dataset_id}/suggestions` — returns suggestion cards with `id`, `severity`, `title`, `text`, and a typed `fix_block` (`type`, `params`).
 - `GET /health` — `{"status":"ok"}`.
 
-`DatasetOut`: `{id, name, filename, size_bytes, created_at}`. CSV uploads are limited to 25 MB. Later phases will extend this contract for pipelines, training, code generation, and LLM drafting.
+`DatasetOut`: `{id, name, filename, size_bytes, created_at}`. CSV uploads are limited to 25 MB.
 
 ## Pipelines and blocks (B2)
 
@@ -34,3 +34,8 @@ Supported blocks: Missing Values, Scaling, Encoding, Outliers, Train/Test Split,
 - `GET /models/{run_id}/export` — downloads the saved `.joblib` model artifact.
 
 The same training pipeline handles Missing Values, Scaling, Encoding, and Outliers blocks with Random Forest, XGBoost, Logistic Regression, or SVM estimators. Random Forest, XGBoost, and Logistic Regression report progressive iteration metrics; SVM reports its fitted result.
+
+## LLM drafting and custom code proposals (B5)
+
+- `POST /pipelines/{pipeline_id}/draft` — body `{target_column, goal?}`; returns a validated proposed block list, optional Python transformer code, and rationale. The draft is advisory and is not saved onto the pipeline or executed.
+- Configure an OpenAI-compatible chat completions provider with `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (defaults to `https://api.openai.com/v1`) and `OPENAI_MODEL` (defaults to `gpt-4o-mini`). Returns `503` when drafting is not configured or the provider is unavailable, `422` for invalid dataset/target, and `502` for malformed provider output.

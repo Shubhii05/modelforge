@@ -7,10 +7,12 @@ import type {
   CanvasNode,
   CanvasEdge,
   RunResults,
+  EpochMetric,
   DataProfile,
   Suggestion,
 } from './types/pipeline'
 import { CATALOG_BY_TYPE } from './types/catalog'
+import { savePipeline, loadPipeline } from './lib/persistence'
 
 interface PipelineStore {
   // ── Core spec (single source of truth) ──
@@ -26,10 +28,12 @@ interface PipelineStore {
   runResults: RunResults | null
   currentEpoch: number
   totalEpochs: number
+  epochMetrics: EpochMetric[]
 
   // ── Dataset / profiler ──
   dataProfile: DataProfile | null
   suggestions: Suggestion[]
+  datasetId: number | null
 
   // ── Project ──
   projectName: string
@@ -46,18 +50,25 @@ interface PipelineStore {
   updateNodePosition: (id: string, position: { x: number; y: number }) => void
 
   setDataProfile: (profile: DataProfile) => void
+  setDatasetId: (id: number | null) => void
   setSuggestions: (suggestions: Suggestion[]) => void
   answerSuggestion: (id: string, accepted: boolean) => void
 
   setRunResults: (results: RunResults) => void
   setIsRunning: (v: boolean) => void
   setCurrentEpoch: (epoch: number) => void
+  addEpochMetric: (metric: EpochMetric) => void
   clearResults: () => void
 
   setTransparencyMode: (v: boolean) => void
   setShowCode: (v: boolean) => void
   setProjectName: (name: string) => void
+  saveNow: () => void
+  lastSavedAt: string | null
 }
+
+// ── Try to hydrate from localStorage ────────────────────────────────────────
+const saved = loadPipeline()
 
 // Default starter pipeline so canvas isn't empty
 const DEFAULT_BLOCKS: PipelineBlock[] = [
@@ -83,10 +94,10 @@ const DEFAULT_EDGES: CanvasEdge[] = [
   { id: 'e4', source: 'b4', target: 'b5' },
 ]
 
-export const usePipelineStore = create<PipelineStore>((set) => ({
-  blocks: DEFAULT_BLOCKS,
-  canvasNodes: DEFAULT_NODES,
-  canvasEdges: DEFAULT_EDGES,
+export const usePipelineStore = create<PipelineStore>((set, get) => ({
+  blocks:      saved?.blocks      ?? DEFAULT_BLOCKS,
+  canvasNodes: saved?.canvasNodes ?? DEFAULT_NODES,
+  canvasEdges: saved?.canvasEdges ?? DEFAULT_EDGES,
   selectedBlockId: null,
   transparencyMode: true,
   showCode: true,
@@ -94,9 +105,12 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
   runResults: null,
   currentEpoch: 0,
   totalEpochs: 200,
+  epochMetrics: [],
   dataProfile: null,
   suggestions: [],
-  projectName: 'Credit Default Prediction',
+  datasetId: null,
+  projectName: saved?.projectName ?? 'Credit Default Prediction',
+  lastSavedAt: saved?.savedAt ?? null,
 
   addBlock: (type, position) => {
     const id = nanoid()
@@ -159,6 +173,7 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
     })),
 
   setDataProfile: (profile) => set({ dataProfile: profile }),
+  setDatasetId: (id) => set({ datasetId: id }),
   setSuggestions: (suggestions) => set({ suggestions }),
 
   answerSuggestion: (id, accepted) =>
@@ -171,9 +186,24 @@ export const usePipelineStore = create<PipelineStore>((set) => ({
   setRunResults: (results) => set({ runResults: results }),
   setIsRunning: (v) => set({ isRunning: v }),
   setCurrentEpoch: (epoch) => set({ currentEpoch: epoch }),
-  clearResults: () => set({ runResults: null, currentEpoch: 0 }),
+  addEpochMetric: (metric) =>
+    set((s) => ({ epochMetrics: [...s.epochMetrics, metric] })),
+  clearResults: () => set({ runResults: null, currentEpoch: 0, epochMetrics: [] }),
 
   setTransparencyMode: (v) => set({ transparencyMode: v }),
   setShowCode: (v) => set({ showCode: v }),
   setProjectName: (name) => set({ projectName: name }),
+
+  saveNow: () => {
+    const s = get()
+    const savedAt = new Date().toISOString()
+    savePipeline({
+      projectName: s.projectName,
+      blocks: s.blocks,
+      canvasNodes: s.canvasNodes,
+      canvasEdges: s.canvasEdges,
+      savedAt,
+    })
+    set({ lastSavedAt: savedAt })
+  },
 }))

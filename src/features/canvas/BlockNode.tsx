@@ -1,10 +1,28 @@
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
-import { Trash2, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Trash2, CheckCircle, AlertCircle, Loader2, Check, X, Pencil } from 'lucide-react'
 import { usePipelineStore } from '../../store'
 import { CATALOG_BY_TYPE } from '../../types/catalog'
-import type { BlockType } from '../../types/pipeline'
+import type { BlockType, CustomCodeStatus } from '../../types/pipeline'
+
+// ── Custom code status badge ─────────────────────────────────────────────────
+const STATUS_CONFIG: Record<CustomCodeStatus, { label: string; cls: string; Icon: React.ElementType }> = {
+  pending:  { label: 'Pending review', cls: 'bg-accent/15 text-accent border-accent/30',         Icon: Loader2 },
+  accepted: { label: 'Accepted',       cls: 'bg-success/15 text-success border-success/30',       Icon: Check },
+  rejected: { label: 'Rejected',       cls: 'bg-red-500/10 text-red-400 border-red-500/20',       Icon: X },
+  editing:  { label: 'Editing',        cls: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', Icon: Pencil },
+}
+
+const CustomCodeBadge: React.FC<{ status: CustomCodeStatus }> = ({ status }) => {
+  const { label, cls, Icon } = STATUS_CONFIG[status]
+  return (
+    <div className={`mt-2 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border w-fit ${cls}`}>
+      <Icon className={`w-2.5 h-2.5 ${status === 'pending' ? 'animate-spin' : ''}`} />
+      {label}
+    </div>
+  )
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   data: 'border-blue-500/50 bg-blue-500/5',
@@ -73,10 +91,9 @@ export const BlockNode = memo(({ data, selected }: NodeProps) => {
         </p>
 
         {catalog.isAI && (
-          <div className="mt-2 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-accent/15 text-accent border border-accent/30 w-fit">
-            <Loader2 className="w-2.5 h-2.5" />
-            AI-generated
-          </div>
+          <CustomCodeBadge
+            status={(block.params.custom_code_status ?? 'pending') as CustomCodeStatus}
+          />
         )}
 
         <div className="mt-2 flex items-center gap-1 text-[10px]">
