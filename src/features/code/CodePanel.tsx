@@ -3,13 +3,42 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Terminal, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react'
 import { usePipelineStore } from '../../store'
-import { generateCode } from '../../lib/codeGenerator'
+import { fetchGeneratedCode, savePipelineSpec, toApiPipelineBlocks } from '../../api/client'
 
 export const CodePanel: React.FC = () => {
-  const { blocks, showCode, setShowCode, transparencyMode } = usePipelineStore()
+  const { blocks, showCode, setShowCode, transparencyMode, datasetId, projectName } = usePipelineStore()
   const [copied, setCopied] = React.useState(false)
-  const code = generateCode(blocks)
+  const [code, setCode] = React.useState('# Upload a CSV dataset to generate pipeline code.')
+  const pipelineId = useRef<number | null>(null)
+  const pipelineDatasetId = useRef<number | null>(null)
   const codeRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (datasetId === null) {
+      pipelineId.current = null
+      pipelineDatasetId.current = null
+      setCode('# Upload a CSV dataset to generate pipeline code.')
+      return
+    }
+    if (pipelineDatasetId.current !== datasetId) {
+      pipelineDatasetId.current = datasetId
+      pipelineId.current = null
+    }
+    let current = true
+    const targetColumn = String(blocks.find((block) => block.type === 'dataset')?.params.target_column ?? '')
+    setCode('# Updating generated code from the current pipeline spec...')
+    void (async () => {
+      try {
+        const id = await savePipelineSpec({ name: projectName, dataset_id: datasetId, blocks: toApiPipelineBlocks(blocks) }, pipelineId.current)
+        pipelineId.current = id
+        const nextCode = await fetchGeneratedCode(id, targetColumn)
+        if (current) setCode(nextCode)
+      } catch (error) {
+        if (current) setCode(`# Code generation unavailable: ${error instanceof Error ? error.message : 'request failed'}`)
+      }
+    })()
+    return () => { current = false }
+  }, [blocks, datasetId, projectName])
 
   // Auto-scroll to bottom when code changes
   useEffect(() => {
