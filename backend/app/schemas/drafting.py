@@ -22,3 +22,9 @@ class DraftResponse(BaseModel):
     blocks: list[DraftBlock]
     custom_code: str
     rationale: str
+
+
+class CustomCodeValidationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str = Field(max_length=20000)

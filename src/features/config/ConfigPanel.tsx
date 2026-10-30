@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { usePipelineStore } from '../../store'
 import { CATALOG_BY_TYPE } from '../../types/catalog'
 import type { BlockType, BlockParams } from '../../types/pipeline'
+import { validateCustomCode } from '../../api/client'
 
 interface SliderFieldProps {
   label: string
@@ -77,7 +78,9 @@ const WHY: Record<BlockType, string> = {
 }
 
 export const ConfigPanel: React.FC = () => {
-  const { blocks, selectedBlockId, transparencyMode } = usePipelineStore()
+  const { blocks, selectedBlockId, transparencyMode, updateBlockParams } = usePipelineStore()
+  const [customCodeError, setCustomCodeError] = useState<string | null>(null)
+  const [validatingCustomCode, setValidatingCustomCode] = useState(false)
   const block = blocks.find((b) => b.id === selectedBlockId)
 
   if (!block) {
@@ -239,7 +242,36 @@ export const ConfigPanel: React.FC = () => {
         )}
 
         {/* ── Evaluate / Custom ────────── */}
-        {(block.type === 'evaluate' || block.type === 'custom_code') && (
+        {block.type === 'custom_code' && (
+          <div className="space-y-2">
+            <label className="text-xs text-text-muted block">Proposed transformer code</label>
+            <textarea
+              value={p.code ?? ''}
+              onChange={(event) => updateBlockParams(block.id, { code: event.target.value })}
+              className="min-h-32 w-full resize-y rounded border border-border bg-surface p-2 font-mono text-[10px] text-text"
+              spellCheck={false}
+            />
+            <div className="flex gap-2 text-xs">
+              <button onClick={async () => {
+                setValidatingCustomCode(true)
+                setCustomCodeError(null)
+                try {
+                  await validateCustomCode(p.code ?? '')
+                  updateBlockParams(block.id, { custom_code_status: 'accepted' })
+                } catch (error) {
+                  setCustomCodeError(error instanceof Error ? error.message : 'Code validation failed')
+                } finally {
+                  setValidatingCustomCode(false)
+                }
+              }} disabled={validatingCustomCode} className="rounded bg-success/15 px-2 py-1 text-success disabled:opacity-50">{validatingCustomCode ? 'Checking…' : 'Accept'}</button>
+              <button onClick={() => updateBlockParams(block.id, { custom_code_status: 'rejected' })} className="rounded bg-red-500/10 px-2 py-1 text-red-300">Reject</button>
+              <span className="ml-auto self-center text-text-muted">Status: {p.custom_code_status ?? 'pending'}</span>
+            </div>
+            {customCodeError && <p role="alert" className="text-[10px] text-red-300">{customCodeError}</p>}
+            <p className="text-[10px] text-text-muted">Custom code is shown for review only and is not executed by ModelForge.</p>
+          </div>
+        )}
+        {block.type === 'evaluate' && (
           <p className="text-xs text-text-muted italic">No configurable parameters for this block.</p>
         )}
       </div>

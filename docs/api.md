@@ -37,5 +37,6 @@ The same training pipeline handles Missing Values, Scaling, Encoding, and Outlie
 
 ## LLM drafting and custom code proposals (B5)
 
-- `POST /pipelines/{pipeline_id}/draft` — body `{target_column, goal?}`; returns a validated proposed block list, optional Python transformer code, and rationale. The draft is advisory and is not saved onto the pipeline or executed.
-- Configure an OpenAI-compatible chat completions provider with `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (defaults to `https://api.openai.com/v1`) and `OPENAI_MODEL` (defaults to `gpt-4o-mini`). Returns `503` when drafting is not configured or the provider is unavailable, `422` for invalid dataset/target, and `502` for malformed provider output.
+- `POST /pipelines/{pipeline_id}/draft` — body `{target_column, goal?}`; returns a validated proposed block list, optional Python transformer code, and rationale. The draft is advisory and is not saved onto the pipeline or executed. Missing provider credentials or malformed/provider-error responses yield the default train/test split and random-forest proposal.
+- `POST /custom-code/validate` — body `{code}`; validates syntax and rejects OS, subprocess, socket, file-open, dynamic-import, eval, and exec operations. The UI changes custom-code status to accepted only after this endpoint returns `{valid:true}`.
+- Configure an OpenAI-compatible chat completions provider with `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (defaults to `https://api.openai.com/v1`) and `OPENAI_MODEL` (defaults to `gpt-4o-mini`). Returns `422` for invalid dataset/target and `502` for structurally invalid proposals. Proposed custom code is syntax checked and rejects OS, subprocess, socket, file-open, dynamic-import, eval, and exec operations.
