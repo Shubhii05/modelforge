@@ -5,7 +5,7 @@ import { CATALOG_BY_TYPE } from '../../types/catalog'
 import type { Suggestion } from '../../types/pipeline'
 
 const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) => {
-  const { answerSuggestion, addBlock } = usePipelineStore()
+  const { answerSuggestion, addBlock, transparencyMode } = usePipelineStore()
   const [showExplain, setShowExplain] = useState(false)
   const catalog = CATALOG_BY_TYPE[suggestion.blockType]
 
@@ -37,7 +37,7 @@ const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) =>
         </div>
       </div>
 
-      {showExplain && (
+      {showExplain && transparencyMode && (
         <div className="p-2 rounded bg-surface border border-accent/20 text-[11px] text-accent/80 italic leading-relaxed">
           {suggestion.explanation}
         </div>
@@ -59,14 +59,14 @@ const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) =>
         >
           <XCircle className="w-3 h-3" /> Skip
         </button>
-        <button
+        {transparencyMode && <button
           onClick={() => setShowExplain((v) => !v)}
           className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border border-border text-text-muted hover:text-text hover:bg-surface-active transition-colors ml-auto"
         >
           <HelpCircle className="w-3 h-3" />
-          <span>Why?</span>
+          <span>What does this mean?</span>
           {showExplain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>
+        </button>}
       </div>
     </div>
   )
