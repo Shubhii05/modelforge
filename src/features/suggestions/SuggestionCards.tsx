@@ -5,9 +5,32 @@ import { CATALOG_BY_TYPE } from '../../types/catalog'
 import type { Suggestion } from '../../types/pipeline'
 
 const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) => {
-  const { answerSuggestion, addBlock, transparencyMode } = usePipelineStore()
+  const { answerSuggestion, addBlock, updateBlockParams, blocks, transparencyMode } = usePipelineStore()
   const [showExplain, setShowExplain] = useState(false)
   const catalog = CATALOG_BY_TYPE[suggestion.blockType]
+
+  const handleAccept = () => {
+    answerSuggestion(suggestion.id, true)
+
+    if (suggestion.blockType === 'dataset') {
+      const datasetBlock = blocks.find((b) => b.type === 'dataset')
+      if (datasetBlock && suggestion.fixParams) {
+        updateBlockParams(datasetBlock.id, suggestion.fixParams)
+        return
+      }
+    }
+
+    const existingBlock = blocks.find((b) => b.type === suggestion.blockType)
+    if (existingBlock && suggestion.fixParams) {
+      updateBlockParams(existingBlock.id, suggestion.fixParams)
+      return
+    }
+
+    const newId = addBlock(suggestion.blockType)
+    if (newId && suggestion.fixParams) {
+      updateBlockParams(newId, suggestion.fixParams)
+    }
+  }
 
   if (suggestion.accepted !== null) {
     return (
@@ -17,7 +40,7 @@ const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) =>
           : 'border-border bg-surface-hover/30 text-text-dark line-through'
       }`}>
         {suggestion.accepted
-          ? <><CheckCircle className="w-3.5 h-3.5 shrink-0" /><span>{suggestion.title} — added</span></>
+          ? <><CheckCircle className="w-3.5 h-3.5 shrink-0" /><span>{suggestion.title} — applied to pipeline</span></>
           : <><XCircle className="w-3.5 h-3.5 shrink-0" /><span>{suggestion.title} — skipped</span></>
         }
       </div>
@@ -45,10 +68,7 @@ const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) =>
 
       <div className="flex items-center gap-1.5">
         <button
-          onClick={() => {
-            answerSuggestion(suggestion.id, true)
-            addBlock(suggestion.blockType)
-          }}
+          onClick={handleAccept}
           className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold bg-accent/15 border border-accent/30 text-accent hover:bg-accent/25 transition-colors"
         >
           <CheckCircle className="w-3 h-3" /> Accept
@@ -59,14 +79,16 @@ const SuggestionCard: React.FC<{ suggestion: Suggestion }> = ({ suggestion }) =>
         >
           <XCircle className="w-3 h-3" /> Skip
         </button>
-        {transparencyMode && <button
-          onClick={() => setShowExplain((v) => !v)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border border-border text-text-muted hover:text-text hover:bg-surface-active transition-colors ml-auto"
-        >
-          <HelpCircle className="w-3 h-3" />
-          <span>What does this mean?</span>
-          {showExplain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </button>}
+        {transparencyMode && (
+          <button
+            onClick={() => setShowExplain((v) => !v)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border border-border text-text-muted hover:text-text hover:bg-surface-active transition-colors ml-auto"
+          >
+            <HelpCircle className="w-3 h-3" />
+            <span>Why?</span>
+            {showExplain ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        )}
       </div>
     </div>
   )
@@ -83,7 +105,7 @@ export const SuggestionCards: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
           <Lightbulb className="w-3.5 h-3.5 text-accent" />
-          Suggestions
+          Dataset Suggestions
         </div>
         {pending > 0 && (
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/20 text-accent font-mono border border-accent/30">

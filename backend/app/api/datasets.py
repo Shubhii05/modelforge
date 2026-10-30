@@ -1,11 +1,13 @@
+import shutil
 from pathlib import Path
 
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.config import DATASET_DIR, MAX_DATASET_BYTES
+from app.core.config import DATASET_DIR, MAX_DATASET_BYTES, ROOT_DIR
 from app.core.database import SessionLocal
 from app.models.dataset import Dataset
 from app.profiler.profile import profile_csv
@@ -14,6 +16,57 @@ from app.services.suggestions import suggestions_for
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
+SAMPLES_DIR = ROOT_DIR / "backend" / "samples"
+
+SAMPLE_CATALOG = [
+    {
+        "key": "iris",
+        "name": "Iris Classification",
+        "filename": "iris.csv",
+        "rows": 150,
+        "cols": 5,
+        "target_column": "species",
+        "description": "Predict iris flower species (setosa, versicolor, virginica) from measurements.",
+    },
+    {
+        "key": "titanic",
+        "name": "Titanic Survival",
+        "filename": "titanic.csv",
+        "rows": 250,
+        "cols": 8,
+        "target_column": "survived",
+        "description": "Predict passenger survival with demographic and ticket information.",
+    },
+    {
+        "key": "customer_churn",
+        "name": "Customer Churn",
+        "filename": "customer_churn.csv",
+        "rows": 300,
+        "cols": 7,
+        "target_column": "churn",
+        "description": "Predict whether a customer cancels subscription based on contract & charges.",
+    },
+    {
+        "key": "credit_default",
+        "name": "Credit Default",
+        "filename": "credit_default.csv",
+        "rows": 300,
+        "cols": 7,
+        "target_column": "default_payment",
+        "description": "Assess credit default risk using age, credit limit, and payment history.",
+    },
+]
+
+
+class SampleDatasetInfo(BaseModel):
+    key: str
+    name: str
+    filename: str
+    rows: int
+    cols: int
+    target_column: str
+    description: str
+
 
 def get_db():
     session = SessionLocal()
@@ -21,6 +74,41 @@ def get_db():
         yield session
     finally:
         session.close()
+
+
+@router.get("/samples", response_model=list[SampleDatasetInfo])
+def list_samples() -> list[SampleDatasetInfo]:
+    return [SampleDatasetInfo(**item) for item in SAMPLE_CATALOG]
+
+
+@router.post("/sample/{sample_key}", response_model=DatasetOut, status_code=201)
+def load_sample_dataset(sample_key: str, db: Session = Depends(get_db)) -> Dataset:
+    matched = next((s for s in SAMPLE_CATALOG if s["key"] == sample_key or s["filename"] == sample_key), None)
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"Sample dataset '{sample_key}' not found")
+
+    sample_src = SAMPLES_DIR / matched["filename"]
+    if not sample_src.is_file():
+        raise HTTPException(status_code=500, detail="Sample dataset file is missing on server")
+
+    target = DATASET_DIR / matched["filename"]
+    if not target.exists():
+        shutil.copyfile(sample_src, target)
+
+    existing = db.scalar(select(Dataset).where(Dataset.filename == matched["filename"]))
+    if existing:
+        return existing
+
+    item = Dataset(
+        name=matched["name"],
+        filename=matched["filename"],
+        path=str(target),
+        size_bytes=target.stat().st_size,
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
 
 
 @router.post("", response_model=DatasetOut, status_code=201)

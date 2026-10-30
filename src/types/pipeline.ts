@@ -22,15 +22,17 @@ export interface BlockParams {
   filename?: string
   target_column?: string
   test_size?: number
+  stratify?: boolean | string
   // missing values
   strategy?: 'median' | 'mean' | 'most_frequent' | 'constant'
   fill_value?: string
+  column?: string
   // scaling
   scaler?: 'standard' | 'minmax' | 'robust'
+  method?: string
   // encoding
   encoding?: 'onehot' | 'ordinal' | 'label'
   // outliers
-  method?: 'iqr' | 'zscore'
   threshold?: number
   // random forest
   n_estimators?: number
@@ -73,6 +75,7 @@ export interface EpochMetric {
 }
 
 export interface RunResults {
+  runId?: number
   accuracy: number
   precision: number
   f1: number
@@ -104,6 +107,7 @@ export interface Suggestion {
   description: string
   explanation: string
   accepted: boolean | null // null = unanswered
+  fixParams?: Record<string, unknown>
 }
 
 export type PipelineSpec = {

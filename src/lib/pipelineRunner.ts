@@ -7,7 +7,7 @@ export interface RunnerCallbacks {
   onError?: (message: string) => void
 }
 
-/** Train the pipeline through the backend SSE endpoint. */
+/** Train the pipeline through the backend SSE endpoint with real weights. */
 export function runPipeline(
   blocks: PipelineBlock[],
   callbacks: RunnerCallbacks,
@@ -15,7 +15,7 @@ export function runPipeline(
   pipelineName = 'ModelForge Pipeline',
 ): () => void {
   if (datasetId === null) {
-    callbacks.onError?.('Upload a dataset before running the pipeline.')
+    callbacks.onError?.('Upload a dataset or load a sample dataset before running the pipeline.')
     return () => undefined
   }
 
@@ -28,9 +28,16 @@ export function runPipeline(
       metricHistory.push(epoch)
       callbacks.onEpoch(metric.iteration, epoch)
     })
-  ).then(({ metric }) => {
-    callbacks.onDone({ accuracy: metric.accuracy, precision: metric.precision, f1: metric.f1,
-      loss: metric.loss, epochMetrics: metricHistory, confusionMatrix: metric.confusion_matrix })
+  ).then(({ runId, metric }) => {
+    callbacks.onDone({
+      runId,
+      accuracy: metric.accuracy,
+      precision: metric.precision,
+      f1: metric.f1,
+      loss: metric.loss,
+      epochMetrics: metricHistory,
+      confusionMatrix: metric.confusion_matrix,
+    })
   }).catch((error: unknown) => {
     if (!controller.signal.aborted) callbacks.onError?.(error instanceof Error ? error.message : 'Training failed')
   })

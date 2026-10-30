@@ -63,6 +63,7 @@ interface PipelineStore {
   setTransparencyMode: (v: boolean) => void
   setShowCode: (v: boolean) => void
   setProjectName: (name: string) => void
+  setEntirePipeline: (blocks: PipelineBlock[], nodes: CanvasNode[], edges: CanvasEdge[], projectName?: string) => void
   saveNow: () => void
   lastSavedAt: string | null
 }
@@ -193,6 +194,20 @@ export const usePipelineStore = create<PipelineStore>((set, get) => ({
   setTransparencyMode: (v) => set({ transparencyMode: v }),
   setShowCode: (v) => set({ showCode: v }),
   setProjectName: (name) => set({ projectName: name }),
+
+  setEntirePipeline: (blocks, canvasNodes, canvasEdges, projectName) => {
+    set((s) => ({
+      blocks,
+      canvasNodes,
+      canvasEdges,
+      projectName: projectName ?? s.projectName,
+      selectedBlockId: null,
+      runResults: null,
+      currentEpoch: 0,
+      epochMetrics: [],
+    }))
+    get().saveNow()
+  },
 
   saveNow: () => {
     const s = get()

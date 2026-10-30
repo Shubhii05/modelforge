@@ -18,11 +18,84 @@ interface ApiProfile {
   dataset_id: number; rows: number; columns: number
   column_profiles: Array<{ name: string; inferred_type: string; missing_percent: number; skew: number | null; cardinality: number }>
 }
-interface ApiSuggestion { id: string; severity: string; title: string; text: string; fix_block: { type: string; params: Record<string, unknown> } }
+export interface ApiSuggestion { id: string; severity: string; title: string; text: string; fix_block: { type: string; params: Record<string, unknown> } }
+
+export interface SampleDatasetMeta {
+  key: string
+  name: string
+  filename: string
+  rows: number
+  cols: number
+  target_column: string
+  description: string
+}
+
+export interface UseCasePlanBlock {
+  id: string
+  type: string
+  label: string
+  category: string
+  params: Record<string, unknown>
+  rationale: string
+}
+
+export interface UseCasePlanResult {
+  project_name: string
+  task_type: string
+  target_column_hint: string
+  recommended_sample: string | null
+  summary: string
+  blocks: UseCasePlanBlock[]
+  suggested_dataset_types: string[]
+  next_steps: string[]
+}
+
+export interface ModelInfoResult {
+  run_id: number
+  pipeline_id: number
+  dataset_id: number
+  target_column: string
+  accuracy: number
+  feature_names: string[]
+  classes: string[]
+}
+
+export interface ClassProbability {
+  label: string | number | boolean
+  probability: number
+}
+
+export interface PredictionResult {
+  label: string | number | boolean
+  probabilities: ClassProbability[]
+}
+
+export interface PredictionResponse {
+  run_id: number
+  predictions: PredictionResult[]
+}
+
+export interface AssistantChatResponse {
+  reply: string
+  current_step: number
+  step_name: string
+  suggestions: string[]
+  actions: Array<{ label: string; action_type: string; payload?: Record<string, unknown> }>
+}
 
 export async function uploadDataset(file: File): Promise<ApiDataset> {
   return request(`/datasets?filename=${encodeURIComponent(file.name)}`, {
     method: 'POST', headers: { 'Content-Type': 'text/csv' }, body: file,
+  })
+}
+
+export async function fetchSampleDatasets(): Promise<SampleDatasetMeta[]> {
+  return request<SampleDatasetMeta[]>('/datasets/samples')
+}
+
+export async function loadSampleDataset(sampleKey: string): Promise<ApiDataset> {
+  return request<ApiDataset>(`/datasets/sample/${encodeURIComponent(sampleKey)}`, {
+    method: 'POST',
   })
 }
 
@@ -40,6 +113,34 @@ export async function getDatasetProfile(id: number, filename: string) {
 
 export function getDatasetSuggestions(id: number) {
   return request<ApiSuggestion[]>(`/datasets/${id}/suggestions`)
+}
+
+export async function planUseCase(useCase: string, targetColumn?: string): Promise<UseCasePlanResult> {
+  return request<UseCasePlanResult>('/usecase/plan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ use_case: useCase, target_column: targetColumn }),
+  })
+}
+
+export async function askAIAssistant(message: string, context?: Record<string, unknown>): Promise<AssistantChatResponse> {
+  return request<AssistantChatResponse>('/assistant/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, context }),
+  })
+}
+
+export async function fetchModelInfo(runId: number): Promise<ModelInfoResult> {
+  return request<ModelInfoResult>(`/models/${runId}/info`)
+}
+
+export async function predictModel(runId: number, rows: Record<string, unknown>[]): Promise<PredictionResponse> {
+  return request<PredictionResponse>(`/models/${runId}/predict`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rows }),
+  })
 }
 
 export async function createPipeline(name: string, datasetId: number, blocks: ApiPipelineBlock[]): Promise<{ id: number }> {
@@ -123,7 +224,7 @@ export async function trainPipeline(pipelineId: number, targetColumn: string, si
       if (type === 'error') throw new Error(parsed.message ?? 'Training failed')
       if (type === 'complete') {
         if (!lastMetric) throw new Error('Training completed without metrics')
-        return { runId: parsed.run_id, metric: lastMetric }
+        return { runId: parsed.run_id as number, metric: lastMetric }
       }
     }
     if (done) break

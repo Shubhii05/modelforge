@@ -10,7 +10,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, log_loss, precision_score
 from sklearn.pipeline import Pipeline as SklearnPipeline
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder, RobustScaler, StandardScaler
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OneHotEncoder, OrdinalEncoder, RobustScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -64,6 +64,8 @@ def _estimator(block: PipelineBlock) -> BaseEstimator:
 
 def _steps_for(columns: list[str], blocks: list[PipelineBlock], numeric: bool) -> list[tuple[str, object]]:
     steps: list[tuple[str, object]] = []
+    has_encoder = any(b.type == "Encoding" for b in blocks)
+
     for index, block in enumerate(blocks):
         if block.type == "Missing Values":
             params = validate_block(block.type, block.params).params.root
@@ -80,8 +82,13 @@ def _steps_for(columns: list[str], blocks: list[PipelineBlock], numeric: bool) -
             steps.append((f"outlier_treatment_{index}", RobustScaler()))
         elif not numeric and block.type == "Encoding":
             method = validate_block(block.type, block.params).params.root.get("method", "onehot")
-            encoder = OneHotEncoder(handle_unknown="ignore") if method == "onehot" else OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
+            encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False) if method == "onehot" else OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
             steps.append((f"encoder_{index}", encoder))
+
+    # Automatic fallback so training does not crash on categorical columns without an explicit Encoding block
+    if not numeric and not has_encoder:
+        steps.append(("auto_encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False)))
+
     return steps
 
 
@@ -101,17 +108,21 @@ def _build_pipeline(X: pd.DataFrame, blocks: list[PipelineBlock], model_block: P
     return SklearnPipeline([("preprocess", preprocess), ("model", _estimator(model_block))])
 
 
-def _metric(iteration: int, model: SklearnPipeline, X_test: pd.DataFrame, y_test: pd.Series) -> TrainingMetric:
+def _metric(iteration: int, model: SklearnPipeline, X_test: pd.DataFrame, y_test: pd.Series, labels: list[object] | None = None) -> TrainingMetric:
     predicted = model.predict(X_test)
     accuracy = float(accuracy_score(y_test, predicted))
-    labels = getattr(model, "classes_")
+    if labels is None:
+        labels = getattr(model, "classes_", getattr(getattr(model, "named_steps", {}).get("model", None), "classes_", None))
     matrix = confusion_matrix(y_test, predicted, labels=labels).astype(int).tolist()
     precision = float(precision_score(y_test, predicted, average="weighted", zero_division=0))
     f1 = float(f1_score(y_test, predicted, average="weighted", zero_division=0))
     if hasattr(model, "predict_proba"):
-        loss = float(log_loss(y_test, model.predict_proba(X_test), labels=labels))
+        try:
+            loss = float(log_loss(y_test, model.predict_proba(X_test), labels=labels))
+        except Exception:
+            loss = float(max(0.0, 1.0 - accuracy))
     else:
-        loss = 1.0 - accuracy
+        loss = float(max(0.0, 1.0 - accuracy))
     return TrainingMetric(iteration=iteration, accuracy=accuracy, loss=loss,
                           confusion_matrix=matrix, precision=precision, f1=f1)
 
@@ -169,6 +180,13 @@ def train_pipeline_events(db: Session, pipeline: Pipeline, dataset: Dataset, tar
                       artifact_path="", accuracy=metric.accuracy)
     db.add(run)
     db.flush()
+
+    # Attach helpful metadata directly to model
+    setattr(estimator, "custom_feature_names_", list(X.columns))
+    setattr(estimator, "custom_target_column_", str(target_column))
+    classes_list = [str(c) for c in getattr(estimator, "classes_", getattr(getattr(estimator, "named_steps", {}).get("model", None), "classes_", []))]
+    setattr(estimator, "custom_classes_", classes_list)
+
     artifact_path = ARTIFACT_DIR / f"model-{run.id}.joblib"
     joblib.dump(estimator, artifact_path)
     run.artifact_path = str(artifact_path)

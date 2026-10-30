@@ -5,6 +5,7 @@ import joblib
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,16 @@ from app.schemas.training import (
 from app.services.training import train_pipeline_events
 
 router = APIRouter(tags=["training"])
+
+
+class ModelInfoResponse(BaseModel):
+    run_id: int
+    pipeline_id: int
+    dataset_id: int
+    target_column: str
+    accuracy: float
+    feature_names: list[str]
+    classes: list[str]
 
 
 @router.post("/pipelines/{pipeline_id}/train")
@@ -58,6 +69,28 @@ def train_pipeline(
     return EventSourceResponse(event_stream())
 
 
+@router.get("/models/{run_id}/info", response_model=ModelInfoResponse)
+def get_model_info(run_id: int, db: Session = Depends(get_db)) -> ModelInfoResponse:
+    run = db.get(TrainingRun, run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Training run not found")
+    try:
+        model = joblib.load(run.artifact_path)
+    except (OSError, ValueError) as exc:
+        raise HTTPException(status_code=404, detail="Model artifact is unavailable") from exc
+    feature_names = [str(name) for name in getattr(model, "custom_feature_names_", getattr(model, "feature_names_in_", []))]
+    classes = [str(c) for c in getattr(model, "custom_classes_", getattr(model, "classes_", []))]
+    return ModelInfoResponse(
+        run_id=run.id,
+        pipeline_id=run.pipeline_id,
+        dataset_id=run.dataset_id,
+        target_column=run.target_column,
+        accuracy=run.accuracy,
+        feature_names=feature_names,
+        classes=classes,
+    )
+
+
 @router.post("/models/{run_id}/predict", response_model=PredictionResponse)
 def predict(run_id: int, payload: PredictionRequest, db: Session = Depends(get_db)) -> PredictionResponse:
     run = db.get(TrainingRun, run_id)
@@ -68,16 +101,23 @@ def predict(run_id: int, payload: PredictionRequest, db: Session = Depends(get_d
     except (OSError, ValueError) as exc:
         raise HTTPException(status_code=404, detail="Model artifact is unavailable") from exc
     rows = [row.root for row in payload.rows]
-    expected = set(str(name) for name in getattr(model, "feature_names_in_", []))
+    expected = set(str(name) for name in getattr(model, "custom_feature_names_", getattr(model, "feature_names_in_", [])))
+    if expected:
+        for row in rows:
+            for col in expected:
+                if col not in row:
+                    row[col] = 0
     if expected and any(set(row) != expected for row in rows):
         raise HTTPException(status_code=422, detail="Each row must include the model's feature columns")
     features = pd.DataFrame(rows)
+    for col in features.columns:
+        features[col] = pd.to_numeric(features[col], errors="ignore")
     try:
         labels = model.predict(features)
         probabilities = model.predict_proba(features) if hasattr(model, "predict_proba") else None
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=422, detail="Prediction rows could not be processed") from exc
-    classes = getattr(model, "classes_", [])
+    classes = getattr(model, "custom_classes_", getattr(model, "classes_", []))
     predictions: list[Prediction] = []
     for index, raw_label in enumerate(labels):
         label = _scalar(raw_label)

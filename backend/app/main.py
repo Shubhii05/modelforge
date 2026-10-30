@@ -9,6 +9,8 @@ from app.api.codegen import router as codegen_router
 from app.api.pipelines import router as pipelines_router
 from app.api.training import router as training_router
 from app.api.drafting import router as drafting_router
+from app.api.usecase import router as usecase_router
+from app.api.assistant import router as assistant_router
 from app.core.database import Base, engine
 from app.models import Dataset, Pipeline  # noqa: F401
 
@@ -20,6 +22,8 @@ app.include_router(pipelines_router, prefix="/api")
 app.include_router(codegen_router, prefix="/api")
 app.include_router(training_router, prefix="/api")
 app.include_router(drafting_router, prefix="/api")
+app.include_router(usecase_router, prefix="/api")
+app.include_router(assistant_router, prefix="/api")
 
 
 class HealthResponse(BaseModel):

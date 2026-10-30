@@ -1,0 +1,301 @@
+age,limit_bal,education,marriage,pay_delay,bill_amt,default_payment
+59,200000,High School,Single,0,7442.83,1
+31,100000,High School,Single,1,1416.01,0
+64,500000,Graduate,Married,-1,14038.78,0
+64,20000,Graduate,Single,-1,13500.44,1
+64,200000,University,Married,0,8088.32,1
+24,20000,High School,Single,0,4846.41,0
+27,200000,University,Married,2,12015.71,0
+22,500000,University,Single,-1,43646.52,0
+54,50000,High School,Single,2,4437.92,1
+60,300000,University,Married,1,16375.52,0
+61,300000,High School,Married,3,34864.89,1
+44,100000,Graduate,Single,1,27465.22,0
+61,200000,High School,Single,0,3328.35,0
+44,300000,University,Single,2,21513.56,1
+34,100000,University,Single,1,22473.9,0
+35,50000,Graduate,Married,-1,28820.26,0
+52,200000,High School,Married,0,34122.03,0
+52,100000,University,Single,0,13655.7,1
+48,200000,Graduate,Married,2,14933.35,1
+45,500000,Graduate,Married,0,36901.66,0
+59,500000,University,Married,-1,5834.01,0
+35,100000,Graduate,Single,1,16681.52,0
+32,500000,University,Single,-1,44899.45,0
+22,50000,University,Married,0,28728.63,0
+64,50000,High School,Married,0,34392.07,0
+58,300000,University,Single,0,4517.89,0
+26,300000,High School,Married,-1,32146.15,0
+40,200000,High School,Married,0,37778.1,0
+45,50000,High School,Single,-1,29869.29,0
+22,20000,Graduate,Single,2,28673.01,1
+55,100000,University,Single,2,35204.46,0
+31,20000,Graduate,Single,0,909.27,1
+55,20000,Graduate,Married,0,31289.34,0
+61,200000,University,Married,0,33718.87,0
+27,100000,University,Single,-1,16863.35,0
+50,500000,High School,Single,2,19830.55,1
+53,200000,University,Single,-1,22714.11,0
+37,200000,High School,Single,2,16972.06,1
+44,300000,University,Single,3,38458.92,1
+41,20000,Graduate,Married,0,42158.89,0
+60,500000,Graduate,Single,3,6733.74,1
+22,50000,University,Single,1,16497.36,0
+46,100000,Graduate,Single,-1,730.73,0
+40,20000,Graduate,Married,-1,39954.46,1
+54,50000,University,Single,0,7399.35,0
+42,50000,High School,Married,-1,13995.32,0
+57,20000,High School,Married,3,20848.3,0
+52,200000,University,Single,-1,6407.17,0
+62,500000,Graduate,Married,0,33609.9,0
+46,300000,Graduate,Married,0,3089.62,0
+54,500000,Graduate,Married,2,28903.04,1
+25,500000,University,Married,0,7559.77,1
+49,500000,Graduate,Married,0,44088.22,1
+36,50000,University,Single,0,21177.98,0
+30,500000,University,Married,0,28350.77,0
+21,300000,University,Single,2,42519.2,0
+52,100000,High School,Single,0,6218.27,0
+63,300000,University,Single,0,9697.45,0
+32,500000,Graduate,Married,0,3667.89,0
+46,50000,Graduate,Single,-1,5758.33,0
+31,300000,Graduate,Married,3,24884.75,1
+44,100000,High School,Married,0,35050.38,0
+52,300000,Graduate,Single,1,11101.51,0
+40,20000,Graduate,Single,0,982.28,0
+32,20000,Graduate,Single,3,26017.99,1
+25,100000,University,Single,-1,42605.66,0
+59,300000,High School,Single,3,2986.27,0
+49,100000,University,Single,0,37744.89,0
+58,500000,University,Married,1,31927.78,1
+57,500000,High School,Married,0,36669.58,0
+45,300000,University,Married,-1,35083.04,0
+47,50000,High School,Married,0,1005.24,0
+40,200000,University,Single,1,30806.25,0
+45,20000,Graduate,Single,-1,43659.61,1
+41,500000,High School,Single,-1,31445.79,1
+61,20000,University,Single,0,26501.99,0
+31,200000,High School,Married,0,5250.64,0
+48,200000,University,Married,0,3959.19,0
+47,500000,Graduate,Married,0,27323.79,0
+33,500000,Graduate,Single,0,26361.74,0
+30,500000,High School,Married,-1,17252.62,0
+52,20000,University,Single,0,37397.81,0
+53,50000,Graduate,Married,-1,3853.48,0
+25,300000,High School,Single,1,42542.07,0
+37,300000,University,Married,3,27474.77,1
+60,50000,University,Married,0,23653.69,0
+32,20000,University,Single,2,18454.99,1
+43,300000,University,Single,-1,6568.53,1
+58,50000,University,Married,0,40735.06,0
+58,20000,University,Married,0,38875.19,0
+24,50000,High School,Single,-1,20931.54,0
+22,300000,Graduate,Single,0,24408.22,0
+36,100000,Graduate,Single,-1,15882.19,0
+23,100000,University,Married,-1,2318.65,1
+48,50000,Graduate,Married,-1,21004.66,1
+54,20000,University,Single,-1,36073.76,0
+50,100000,High School,Married,-1,36375.96,0
+35,500000,Graduate,Single,0,32562.96,1
+27,100000,High School,Single,0,5269.15,0
+55,100000,Graduate,Married,0,1393.17,0
+59,500000,Graduate,Married,2,26914.86,0
+23,20000,University,Married,0,26614.43,0
+64,100000,University,Married,2,27536.21,1
+26,300000,High School,Married,-1,16758.38,0
+50,100000,Graduate,Single,-1,37982.97,1
+51,300000,High School,Married,0,43641.43,0
+26,500000,Graduate,Married,0,41857.23,0
+28,50000,Graduate,Single,-1,14903.73,0
+53,200000,Graduate,Married,0,13344.06,0
+31,200000,Graduate,Single,0,20714.92,0
+30,200000,Graduate,Single,-1,6677.7,1
+29,100000,University,Single,1,5248.12,0
+64,50000,Graduate,Single,2,8564.87,1
+60,500000,Graduate,Single,1,33897.34,0
+55,300000,Graduate,Married,0,40900.04,0
+62,20000,University,Single,1,40535.2,0
+53,20000,Graduate,Single,0,24688.1,0
+59,100000,University,Married,1,31370.43,1
+49,20000,University,Single,1,7249.53,1
+57,100000,University,Married,0,34429.41,0
+53,500000,High School,Married,1,6173.25,0
+49,300000,University,Married,1,1043.04,0
+56,200000,University,Single,1,43178.83,0
+26,50000,High School,Married,0,23012.05,0
+60,200000,University,Married,2,35658.77,1
+62,20000,University,Single,0,33271.77,0
+42,100000,University,Married,3,37830.96,1
+21,500000,University,Single,0,2936.89,0
+46,20000,Graduate,Married,2,41571.73,1
+47,50000,High School,Single,-1,41117.35,0
+45,200000,University,Single,0,26336.18,0
+48,50000,University,Married,3,7115.49,1
+48,300000,Graduate,Married,0,18180.66,0
+39,500000,Graduate,Married,-1,21506.98,0
+38,20000,University,Single,0,20113.94,0
+58,100000,Graduate,Married,2,42602.14,1
+30,100000,University,Married,-1,7448.79,0
+49,20000,University,Married,-1,22995.1,0
+57,100000,High School,Single,1,36336.52,0
+52,500000,High School,Married,0,9621.8,0
+38,50000,Graduate,Married,-1,8573.88,0
+38,50000,High School,Single,0,37217.28,0
+32,200000,University,Married,0,19907.63,0
+42,200000,Graduate,Single,0,40307.57,0
+37,50000,Graduate,Married,0,28689.78,0
+42,100000,University,Married,2,31259.37,0
+26,50000,University,Single,0,3489.31,0
+58,50000,University,Married,-1,12233.93,0
+47,50000,University,Single,-1,41191.33,0
+48,500000,University,Married,-1,33342.5,1
+56,100000,Graduate,Married,-1,16327.44,0
+59,100000,High School,Married,3,6507.56,1
+56,200000,Graduate,Single,1,43008.02,1
+29,50000,University,Married,0,18869.31,0
+60,50000,University,Married,-1,604.1,0
+58,50000,Graduate,Married,1,43313.4,0
+32,500000,High School,Single,0,34277.1,0
+36,500000,High School,Single,0,31346.3,1
+46,50000,University,Single,0,21557.85,0
+35,300000,University,Married,-1,19268.44,0
+51,500000,Graduate,Single,0,29182.33,0
+44,100000,University,Single,2,24096.8,1
+43,200000,University,Single,0,29943.66,0
+53,300000,University,Married,-1,39219.4,1
+33,300000,University,Single,-1,922.1,1
+49,500000,University,Single,2,44291.71,0
+45,200000,University,Married,-1,16280.69,0
+24,50000,Graduate,Married,-1,44453.65,0
+44,200000,Graduate,Single,1,4478.79,0
+44,100000,High School,Single,1,3391.9,0
+49,500000,University,Single,-1,8355.5,0
+23,500000,High School,Single,-1,23562.59,0
+62,100000,University,Single,-1,36804.57,0
+45,20000,High School,Single,0,17907.05,1
+49,20000,Graduate,Single,-1,15142.79,0
+31,100000,Graduate,Married,-1,31459.29,1
+38,500000,High School,Married,2,44620.65,1
+52,500000,University,Single,0,30671.72,0
+53,500000,University,Single,-1,7501.66,1
+33,100000,Graduate,Single,-1,31605.09,1
+25,100000,High School,Single,2,728.96,0
+50,50000,High School,Single,0,784.17,0
+47,20000,University,Married,0,903.72,0
+26,100000,University,Single,3,15713.31,0
+50,300000,Graduate,Single,0,3518.75,0
+37,200000,Graduate,Single,0,28130.74,1
+34,300000,University,Single,0,17570.75,1
+53,500000,University,Single,-1,545.81,1
+54,300000,High School,Married,2,23952.57,0
+31,200000,High School,Single,-1,6344.41,0
+64,200000,University,Single,2,43421.16,0
+25,100000,Graduate,Married,1,33689.75,1
+45,200000,University,Single,0,7586.44,1
+49,300000,Graduate,Single,0,1294.85,0
+64,300000,High School,Single,-1,21063.33,1
+27,20000,University,Married,0,10536.54,1
+42,500000,Graduate,Single,0,44303.64,1
+41,50000,University,Married,3,32624.0,0
+45,20000,High School,Single,1,33837.69,1
+32,20000,University,Married,0,9860.56,1
+60,50000,Graduate,Single,-1,16102.9,1
+46,500000,Graduate,Single,-1,31347.13,0
+62,200000,Graduate,Single,1,1905.58,0
+59,20000,University,Single,1,36176.9,1
+27,100000,High School,Single,1,20628.16,0
+61,200000,University,Married,-1,11496.09,1
+39,500000,Graduate,Married,1,29812.5,0
+38,500000,University,Married,3,43878.3,0
+30,100000,University,Married,-1,11966.89,0
+50,300000,University,Single,0,15894.11,0
+40,200000,Graduate,Single,0,20018.39,0
+56,50000,University,Single,0,44649.93,0
+32,100000,University,Single,1,6354.76,0
+50,50000,Graduate,Single,-1,38520.14,0
+34,20000,University,Married,0,14390.59,0
+55,300000,Graduate,Single,0,18151.36,0
+51,100000,High School,Married,0,20470.6,0
+61,20000,University,Single,2,11737.49,1
+48,20000,University,Married,0,35289.67,0
+48,500000,Graduate,Married,-1,3040.37,0
+40,50000,Graduate,Married,0,42057.44,0
+34,200000,Graduate,Single,3,719.83,0
+49,20000,University,Married,0,15748.08,0
+43,500000,Graduate,Single,-1,30467.74,0
+21,300000,University,Single,-1,31321.85,0
+46,100000,University,Single,0,39166.27,0
+32,100000,High School,Single,0,10097.54,0
+25,20000,Graduate,Single,3,2645.44,0
+61,20000,High School,Single,0,33360.99,0
+58,500000,High School,Married,2,39566.16,1
+31,20000,Graduate,Single,-1,14944.07,1
+27,300000,University,Single,0,24783.07,0
+58,50000,University,Married,0,34290.82,0
+41,50000,High School,Single,2,36712.6,1
+25,50000,University,Married,0,18049.26,0
+64,100000,University,Single,0,40403.79,1
+35,20000,University,Married,-1,21823.65,1
+34,300000,University,Single,0,41867.46,0
+28,50000,University,Single,-1,18902.94,1
+31,200000,Graduate,Single,1,5256.02,0
+62,200000,University,Married,1,17121.18,0
+33,500000,High School,Single,-1,9936.0,0
+62,20000,Graduate,Single,-1,37106.34,0
+30,20000,Graduate,Single,0,26604.08,1
+55,200000,High School,Married,-1,1551.92,0
+48,100000,Graduate,Married,0,22606.13,0
+55,300000,University,Married,0,32741.0,1
+44,200000,High School,Single,0,40795.85,0
+56,300000,High School,Married,0,10586.21,0
+24,300000,University,Married,1,10900.19,0
+58,50000,University,Married,0,8969.46,1
+64,50000,University,Single,0,15343.84,0
+56,300000,Graduate,Single,-1,24344.33,1
+36,200000,Graduate,Single,1,41759.41,0
+48,100000,Graduate,Single,2,24528.09,0
+41,200000,University,Married,1,6183.25,0
+58,200000,University,Married,0,12208.51,0
+41,50000,High School,Single,0,18165.68,0
+24,50000,University,Single,0,44651.03,0
+62,200000,High School,Married,1,17437.74,0
+50,500000,High School,Single,0,4100.91,0
+22,100000,University,Married,3,29023.26,0
+45,300000,High School,Single,0,27478.26,0
+23,100000,University,Married,0,3533.67,1
+45,200000,Graduate,Single,-1,26945.94,0
+40,50000,Graduate,Single,-1,1287.11,0
+43,100000,University,Single,-1,9923.11,0
+51,20000,University,Married,-1,35329.97,1
+27,200000,University,Single,-1,10852.73,0
+49,200000,University,Single,1,35748.17,0
+55,100000,University,Single,1,34734.07,1
+22,500000,University,Married,-1,34332.9,1
+59,300000,Graduate,Married,-1,43926.38,0
+52,200000,University,Married,0,22720.36,0
+46,500000,Graduate,Married,1,21682.81,0
+49,500000,University,Single,-1,5045.65,0
+61,20000,High School,Married,-1,41899.19,1
+60,300000,High School,Single,0,20530.54,0
+37,200000,University,Single,-1,44478.25,0
+28,300000,Graduate,Single,0,36194.81,1
+37,300000,University,Married,0,44625.68,0
+39,100000,Graduate,Married,-1,29883.47,0
+30,500000,Graduate,Single,2,35320.58,1
+29,50000,University,Married,-1,12101.74,1
+45,50000,University,Single,0,6072.89,0
+22,500000,University,Single,0,27934.24,1
+30,20000,High School,Married,0,19727.42,0
+45,50000,High School,Married,-1,9287.44,0
+41,100000,University,Married,2,12000.21,1
+41,300000,Graduate,Single,1,25322.69,1
+52,100000,Graduate,Single,-1,24510.25,0
+22,300000,University,Married,3,22233.54,1
+64,300000,University,Single,1,27731.35,1
+43,300000,Graduate,Single,2,19804.12,1
+36,20000,University,Single,-1,9130.95,0
+54,100000,Graduate,Single,1,27866.53,0
+33,20000,University,Married,1,2071.36,0
+34,20000,High School,Married,0,7125.52,1
+39,300000,Graduate,Married,0,35227.79,1
+46,300000,University,Married,-1,1793.68,1

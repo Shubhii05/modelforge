@@ -2,12 +2,14 @@
 
 Base path: `/api`; JSON responses use snake_case.
 
-## Datasets (B1)
+## Datasets (B1 & F4)
 
 - `POST /datasets?filename=<name.csv>` — send raw CSV bytes as the request body; returns `DatasetOut`.
 - `GET /datasets` — returns `DatasetOut[]`.
 - `GET /datasets/{dataset_id}/profile` — returns row/column counts, per-column inferred type, missing percentage, cardinality, skew, outlier percentage and date-like flag, plus categorical class imbalance summaries.
 - `GET /datasets/{dataset_id}/suggestions` — returns suggestion cards with `id`, `severity`, `title`, `text`, and a typed `fix_block` (`type`, `params`).
+- `GET /datasets/samples` — list built-in sample datasets (Iris, Titanic, Customer Churn, Credit Default).
+- `POST /datasets/sample/{sample_key}` — load a built-in sample dataset into the database and filesystem.
 - `GET /health` — `{"status":"ok"}`.
 
 `DatasetOut`: `{id, name, filename, size_bytes, created_at}`. CSV uploads are limited to 25 MB.
@@ -23,20 +25,29 @@ Base path: `/api`; JSON responses use snake_case.
 
 Supported blocks: Missing Values, Scaling, Encoding, Outliers, Train/Test Split, Random Forest, XGBoost, Logistic Regression, and SVM. Parameter constraints and defaults are published in `GET /blocks` and enforced by both pipeline writes and block validation.
 
+## Use Case Planning (F1)
+
+- `POST /usecase/plan` — body `{use_case, target_column?}`; performs natural language problem decomposition to propose project name, task type, target column hint, recommended sample dataset, architectural summary, structured initial pipeline blocks, and next steps.
+
+## AI Assistant (F3)
+
+- `POST /assistant/chat` — body `{message, context?}`; returns step-by-step guidance across all 5 stages of model building (Use Case, Dataset, Pipeline, Training, Inference), contextual explanations of metrics/imputation/algorithms, and clickable action suggestions.
+
 ## Code generation (B3)
 
 - `POST /pipelines/{pipeline_id}/code` — body `{target_column}`; returns `{pipeline_id, filename, target_column, code}`. Generates executable Python using the saved pipeline spec and dataset. It returns `422` if the dataset/target is unavailable or the pipeline does not contain exactly one model block.
 
-## Training and models (B4)
+## Training and models (B4 & F2)
 
 - `POST /pipelines/{pipeline_id}/train` — body `{target_column}`; streams Server-Sent Events named `started`, `metric`, `complete`, or `error`. Each `metric` includes iteration, accuracy, loss, confusion matrix, precision, and F1. A completed run persists the fitted sklearn Pipeline as a joblib artifact.
-- `POST /models/{run_id}/predict` — body `{rows:[{feature:value}]}`; returns predictions and per-class probabilities when the estimator supports them.
+- `GET /models/{run_id}/info` — returns run ID, accuracy, target column, feature names list, and target class labels for live inference.
+- `POST /models/{run_id}/predict` — body `{rows:[{feature:value}]}`; returns real model predictions and per-class probabilities evaluated by the fitted scikit-learn model artifact.
 - `GET /models/{run_id}/export` — downloads the saved `.joblib` model artifact.
 
-The same training pipeline handles Missing Values, Scaling, Encoding, and Outliers blocks with Random Forest, XGBoost, Logistic Regression, or SVM estimators. Random Forest, XGBoost, and Logistic Regression report progressive iteration metrics; SVM reports its fitted result.
+The training pipeline handles Missing Values, Scaling, Encoding, and Outliers blocks with Random Forest, XGBoost, Logistic Regression, or SVM estimators. Categorical variables and missing values are automatically safeguarded. Random Forest, XGBoost, and Logistic Regression report progressive iteration metrics; SVM reports its fitted result.
 
 ## LLM drafting and custom code proposals (B5)
 
 - `POST /pipelines/{pipeline_id}/draft` — body `{target_column, goal?}`; returns a validated proposed block list, optional Python transformer code, and rationale. The draft is advisory and is not saved onto the pipeline or executed. Missing provider credentials or malformed/provider-error responses yield the default train/test split and random-forest proposal.
 - `POST /custom-code/validate` — body `{code}`; validates syntax and rejects OS, subprocess, socket, file-open, dynamic-import, eval, and exec operations. The UI changes custom-code status to accepted only after this endpoint returns `{valid:true}`.
-- Configure an OpenAI-compatible chat completions provider with `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (defaults to `https://api.openai.com/v1`) and `OPENAI_MODEL` (defaults to `gpt-4o-mini`). Returns `422` for invalid dataset/target and `502` for structurally invalid proposals. Proposed custom code is syntax checked and rejects OS, subprocess, socket, file-open, dynamic-import, eval, and exec operations.
+- Configure an OpenAI-compatible chat completions provider with `OPENAI_API_KEY`; optionally set `OPENAI_BASE_URL` (defaults to `https://api.openai.com/v1`) and `OPENAI_MODEL` (defaults to `gpt-4o-mini`).

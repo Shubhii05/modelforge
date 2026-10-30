@@ -1,15 +1,18 @@
 import React from 'react'
-import { Play, Code2, Eye, EyeOff, LayoutTemplate, Layers } from 'lucide-react'
+import { Play, Code2, Eye, EyeOff, LayoutTemplate, Layers, Sparkles, Bot } from 'lucide-react'
 
 interface TopBarProps {
   projectName?: string
   isRunning?: boolean
   showCode?: boolean
   transparencyMode?: boolean
+  activeTab?: string
   onToggleCode?: () => void
   onToggleTransparency?: () => void
   onRunPipeline?: () => void
   onOpenTemplates?: () => void
+  onOpenUseCase?: () => void
+  onToggleAssistant?: () => void
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -17,10 +20,13 @@ export const TopBar: React.FC<TopBarProps> = ({
   isRunning = false,
   showCode = true,
   transparencyMode = true,
+  activeTab,
   onToggleCode,
   onToggleTransparency,
   onRunPipeline,
   onOpenTemplates,
+  onOpenUseCase,
+  onToggleAssistant,
 }) => {
   return (
     <header className="h-12 border-b border-border bg-surface px-4 flex items-center justify-between select-none">
@@ -47,7 +53,33 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
+        {/* Describe Use Case CTA */}
+        <button
+          onClick={onOpenUseCase}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold bg-accent/15 border border-accent/40 text-accent hover:bg-accent/25 transition-all shadow-sm"
+          title="Describe use case in plain text to generate pipeline"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Use Case Setup</span>
+        </button>
+
+        {/* AI Assistant toggle */}
+        <button
+          onClick={onToggleAssistant}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs border transition-colors ${
+            activeTab === 'assistant'
+              ? 'border-accent/40 bg-accent/20 text-accent font-semibold'
+              : 'border-border bg-surface-hover hover:bg-surface-active text-text'
+          }`}
+          title="Toggle AI Co-Pilot Assistant"
+        >
+          <Bot className="w-3.5 h-3.5 text-accent" />
+          <span>AI Assistant</span>
+        </button>
+
+        <div className="h-4 w-[1px] bg-border mx-0.5" />
+
         {/* Transparency study toggle */}
         <button
           onClick={onToggleTransparency}
@@ -93,10 +125,10 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={onRunPipeline}
           disabled={isRunning}
-          className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold bg-accent hover:bg-accent-hover active:scale-[0.98] text-white shadow-sm transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3.5 py-1 rounded text-xs font-semibold bg-accent hover:bg-accent-hover active:scale-[0.98] text-white shadow-sm transition-all disabled:opacity-50"
         >
           <Play className={`w-3.5 h-3.5 fill-current ${isRunning ? 'animate-pulse' : ''}`} />
-          <span>{isRunning ? 'Running...' : 'Run Pipeline'}</span>
+          <span>{isRunning ? 'Training…' : 'Run Pipeline'}</span>
         </button>
       </div>
     </header>
