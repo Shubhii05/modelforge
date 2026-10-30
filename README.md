@@ -59,4 +59,5 @@ The API contract, request examples, and response behavior are documented in [doc
 - `src/` — React, TypeScript, canvas UI, API client, and frontend tests
 - `backend/app/` — FastAPI routes, schemas, profiling, code generation, and model training
 - `backend/tests/` — backend unit and integration coverage
-- `docs/` — [API contract](docs/api.md), [project progress](docs/progress.md), [dashboard reference](docs/assets/dashboard-reference.png), and [project paper](docs/assets/project-paper.pdf)
+- `docs/` — [API contract](docs/api.md), [dashboard reference](docs/assets/dashboard-reference.png), and [project paper](docs/assets/project-paper.pdf)
+- `PROGRESS.md` — implementation checklist

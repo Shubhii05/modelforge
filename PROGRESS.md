@@ -8,4 +8,4 @@
 - [x] I1: frontend API integration for dataset upload/profiling/suggestions and pipeline training.
 - [x] I2: evaluation coverage, check script, CI, and README.
 
-API contract is documented in `docs/api.md`. Frontend files remain untouched through B4.
+API contract is documented in `docs/api.md`. The frontend consumes the backend API for profiling, suggestions, pipeline code generation, and training.
